@@ -5,7 +5,6 @@
         <property name="hibernate.connection.url">online_service_url_connection</property>
         <!--for local connection you must use: username, password (hibernate.connection.*)-->
 
-
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.show_sql">true</property>
 
