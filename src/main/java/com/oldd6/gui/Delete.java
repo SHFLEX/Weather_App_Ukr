@@ -1,4 +1,4 @@
-package com.oldd6;
+package com.oldd6.gui;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;

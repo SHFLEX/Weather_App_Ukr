@@ -2,9 +2,8 @@
     <session-factory>
 
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
-        <property name="hibernate.connection.url">jdbc:postgresql://oldd6db-oldd6.j.aivencloud.com:21227/defaultdb?ssl=require&amp;user=avnadmin&amp;password=AVNS_gGwghLcxW_D1R5GTLnz</property>
+        <property name="hibernate.connection.url"><!--connection link--></property>
         <!--for local connection you must use: username, password (hibernate.connection.*)-->
-
 
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.show_sql">true</property>

@@ -1,4 +1,4 @@
-package com.oldd6;
+package com.oldd6.gui;
 import com.lowagie.text.Document;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
@@ -96,15 +96,19 @@ public class SaveInfo extends JFrame implements ActionListener{
                 wb.write(new FileOutputStream(Show.path+"Погода_Інфо.xlsx"));
                 wb.close();
             }catch(IOException ex){ex.printStackTrace();}
+            Show.saved();
         }else if(e.getSource()==b2){
             createDTM();
             export(tm, "Погода_Інфо.csv", "csv");
+            Show.saved();
         }else if(e.getSource()==b3){
             createDTM();
             export(tm, "Погода_Інфо.json", "json");
+            Show.saved();
         }else if(e.getSource()==b4){
             createDTM();
             export(tm, "Погода_Інфо.txt", "txt");
+            Show.saved();
         }else if(e.getSource()==b5){
             try{
                 createDTM();
@@ -113,6 +117,8 @@ public class SaveInfo extends JFrame implements ActionListener{
                 doc.open();
 
                 PdfPTable pt = new PdfPTable(tm.getColumnCount());
+                pt.setTotalWidth(580);
+                pt.setLockedWidth(true);
 
                 for(int i = 0; i<tm.getColumnCount(); i++){
                     pt.addCell(tm.getColumnName(i));
@@ -127,19 +133,26 @@ public class SaveInfo extends JFrame implements ActionListener{
                 doc.add(pt);
                 doc.close();
             }catch(FileNotFoundException ex){ex.printStackTrace();}
+            Show.saved();
         }
     }
     public static void createDTM(){
-        tm = new DefaultTableModel(new Object[]{
-                "Дата",
-                "Стан повітря",
-                "Температура",
-                "Шв. вітру"
-        },0);
-        Session s = Main.sf.openSession();
-        List<Weather> wths = s.createQuery("from Weather", Weather.class).list();
-        for(Weather wth : wths){
-            tm.addRow(new Object[]{wth.getDate(), wth.getAir(), wth.getTemp(), wth.getWind()});
+        Show.choosePath();
+        try (Session s = Main.sf.openSession()){
+            tm = new DefaultTableModel(new Object[]{
+                    "Дата",
+                    "Температура",
+                    "Стан неба",
+                    "Атмосферний тиск",
+                    "Вологість",
+                    "Швидкість вітру",
+                    "Опади"
+            }, 0);
+            List<Weather> wths = s.createQuery("from Weather", Weather.class).list();
+            for (Weather wth : wths) {
+                tm.addRow(new Object[]{wth.getDate(), wth.getTemp(), wth.getStateSky(),
+                        wth.getPressure(), wth.getHumid(), wth.getWind(), wth.getPrecip()});
+            }
         }
     }
     public static void export(DefaultTableModel tm, String nf, String type){

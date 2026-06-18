@@ -1,4 +1,4 @@
-package com.oldd6;
+package com.oldd6.gui;
 import org.hibernate.Session;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
@@ -10,7 +10,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 public class SaveChart extends JFrame implements ActionListener {
@@ -53,26 +52,28 @@ public class SaveChart extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e){
         if(e.getSource()==b){
             createChart(".png");
+            Show.saved();
         }
         else if(e.getSource()==b2){
             createChart(".jpeg");
+            Show.saved();
         }
     }
 
     public static void createChart(String f){
+        Show.choosePath();
         DefaultCategoryDataset data = new DefaultCategoryDataset();
-        Session s = Main.sf.openSession();
-        List<Weather> wths = s.createQuery("from Weather", Weather.class).list();
-        for(Weather wth : wths) data.addValue(wth.getTemp(), "Температура", wth.getDate());
-        jchart = ChartFactory.createLineChart(
-                "Температура",
-                "Дані",
-                "ПОГОДА",
-                data
-        );
-        try{
+        try (Session s = Main.sf.openSession()){
+            List<Weather> wths = s.createQuery("from Weather", Weather.class).list();
+            for(Weather wth : wths) data.addValue(wth.getTemp(), "Температура", wth.getDate());
+            jchart = ChartFactory.createLineChart(
+                    "Температура",
+                    "Дата",
+                    "ПОГОДА",
+                    data
+            );
             ChartUtils.saveChartAsJPEG(new File(Show.path+"Темп_графік"+f), jchart, 1920, 1080);
-        }catch(IOException ex){
+        }catch(Exception ex){
             ex.printStackTrace();
         }
     }

@@ -1,10 +1,9 @@
-package com.oldd6;
+package com.oldd6.gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import org.hibernate.Session;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
 
@@ -14,12 +13,11 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
-
 public class Show extends JFrame implements ActionListener{
-    public static final String path = System.getProperty("user.home")+"/Downloads/";
+    public static String path;
+    JDialog dial;
     JLabel l;
     JButton b, b2, b3, b4;
     JFreeChart jchart;
@@ -83,31 +81,55 @@ public class Show extends JFrame implements ActionListener{
                     data
             );
             ChartPanel cp = new ChartPanel(jchart);
-            JOptionPane.showMessageDialog(null, cp, "Лінійний графік погоди", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, cp, "Лінійний графік температури", JOptionPane.INFORMATION_MESSAGE);
         }
         else if(e.getSource()==b2){
-            DefaultTableModel tm = new DefaultTableModel(new Object[]{
-                    "Дата",
-                    "Стан повітря",
-                    "Температура",
-                    "Шв. вітру"
-            },0);
-            Session s = Main.sf.openSession();
-            List<Weather> wths = s.createQuery("from Weather", Weather.class).list();
-            for(Weather wth : wths){
-                tm.addRow(new Object[]{wth.getDate(), wth.getAir(), wth.getTemp(), wth.getWind()});
-            }
-            JTable table = new JTable(tm);
-            table.putClientProperty(FlatClientProperties.STYLE, "rowHeight: 35");
+            try (Session s = Main.sf.openSession()){
+                DefaultTableModel tm = new DefaultTableModel(new Object[]{
+                        "Дата",
+                        "Температура",
+                        "Стан неба",
+                        "Атмосферний тиск",
+                        "Вологість",
+                        "Швидкість вітру",
+                        "Опади"
+                }, 0);
+                List<Weather> wths = s.createQuery("from Weather", Weather.class).list();
+                for (Weather wth : wths) {
+                    tm.addRow(new Object[]{wth.getDate(), wth.getTemp(), wth.getStateSky(),
+                            wth.getPressure(), wth.getHumid(), wth.getWind(), wth.getPrecip()});
+                }
+                JTable table = new JTable(tm);
+                for(int i = 0; i<table.getColumnCount(); i++)
+                    table.getColumnModel().getColumn(i).setPreferredWidth(160);
+                table.putClientProperty(FlatClientProperties.STYLE, "rowHeight: 40");
+                table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-            JOptionPane.showMessageDialog(null, new JScrollPane(table), "Таблиця погоди",
-                    JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, new JScrollPane(table), "Погодна статистика",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+            }
         }
         else if(e.getSource()==b3){
             new SaveChart();
         }
         else if(e.getSource()==b4){
             new SaveInfo();
+        }
+    }
+
+    public static void saved(){
+        JLabel sav = new JLabel("<html>Файл успішно збережено!<br>Шлях файлу: "+path+"</html>");
+        sav.setFont(new Font("Rubik", Font.BOLD, 28));
+        sav.setForeground(Color.BLACK);
+        JOptionPane.showMessageDialog(null, sav, "Збережено",
+                JOptionPane.INFORMATION_MESSAGE, new ImageIcon("WEATHER.png"));
+    }
+    public static void choosePath(){
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
+            Show.path = chooser.getSelectedFile().getAbsolutePath()+File.separator;
         }
     }
 }
